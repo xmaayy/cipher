@@ -3,9 +3,12 @@
  */
 
 //Yes I know this isnt great but ill do what I want with globals
+var ApiFetch = require(__dirname + '\\js\\api\\ApiFetch.js')
 var fetchBox = document.getElementById('search-field');
 var fetchBtn = document.getElementById('fetchBtn');
-var downloads = []; 
+var downloads = [];
+
+var Api = new ApiFetch()
 
 /**
  * After you call makeDownload, this function will be called to generate the inner HTML for the element.
@@ -39,6 +42,7 @@ makeProgBar = (size, prog = 0, name) =>{
  * @returns {object} A object with the HTML for the download, as well as its progress (in the future some ref to its download as well)
  */
 makeDownload = (link) => {
+    Api.logPair()
     var dlObj = []
     dlObj.push({
         'html' : makeProgBar(20,0,fetchBox.value)
@@ -47,6 +51,8 @@ makeDownload = (link) => {
 }
 
 /**
+ * DEPRICATED DONT USE IT CAN BE REPLACED BY ONE LINE OF JQ
+ * 
  * This function renders all download items to the DOM under the 'progress' area div tag
  * This should only be called when a new item is added, another function can be used to
  * update individual downloads based on their tags (NOTE : Collisions need to be avoided there)
@@ -67,9 +73,9 @@ renderDownloads = (downloads) => {
  */
 newDownload = () => {    
     makeDownload().forEach((dlObj) => {
+        $('#progress-area').append(dlObj.html)
         downloads.push(dlObj)
-    })    
-    renderDownloads(downloads)
+    })
 }
 
 /**
