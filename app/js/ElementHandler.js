@@ -4,8 +4,10 @@
 
 //Yes I know this isnt great but ill do what I want with globals
 var ApiFetch = require(__dirname + '\\js\\api\\ApiFetch.js')
+var DLM = require(__dirname + '\\js\\DLM.js')
 var fetchBox = document.getElementById('search-field');
 var fetchBtn = document.getElementById('fetchBtn');
+var dlCount;
 var downloads = [];
 
 var Api = new ApiFetch()
@@ -15,22 +17,42 @@ var Api = new ApiFetch()
  * @param {int} size Represents the file size in MB
  * @param {int} prog Progress of the download, generally 0 as you're not adding a previously started download
  * @param {string} name The name of the file, this will be fetched in the makeDownload function (hopefully)
+ * @return {string} An HTML element corresponding to the download at the provided link
  */
-makeProgBar = (size, prog = 0, name) =>{
-     return `<div class="bg-info">
-                <span><div>${name}<div><div>${size}</div></span>
-                <div class="progress bg-warning">
-                    <div class = "bar bg-danger progress-bar-striped progress-bar-animated" 
-                    role = "progressbar" 
-                    aria-valuenow = ${prog}
-                    aria-valuemin = "0" 
-                    aria-valuemax = "100"
-                    style = "width: ${prog}%;"
-                    id = "prog">
-                    0
-                    </div>
-                </div>
-            </div>`
+makeProgBar = (size = 0, prog = 0, name = "loading", id, link = "false") =>{
+     return `<div class="container-fluid" id = "${id}" linked = "${link}">
+     <div class="row">
+         <div class="col-md-8">
+             <div id = "${id}name">
+                 Loading...
+             </div>
+             <div id = "${id}size">
+                 0
+             </div>
+             <div class="progress" id = "${id}prog">
+                 <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated"
+                     aria-valuenow = ${prog}
+                     aria-valuemin = "0" 
+                     aria-valuemax = "100"
+                     style = "width: ${prog}%;"
+                      
+                     updated = "false">
+                 </div>
+             </div>
+         </div>
+         <div class="col-md-4">
+         <div>Controls</div>
+             <div class="btn-group" role="group">				 
+                 <button class="btn btn-secondary no-drag" type="button" id = "${id}start">
+                     Start
+                 </button> 
+                 <button class="btn btn-secondary no-drag" type="button">
+                     Stop
+                 </button> 
+             </div>
+         </div>
+     </div>
+ </div>`
 }
 
 /**
@@ -39,15 +61,26 @@ makeProgBar = (size, prog = 0, name) =>{
  * to the download page
  * 
  * @param {string} link This is the MegaCrypt location from which we will fetch the link
- * @returns {object} A object with the HTML for the download, as well as its progress (in the future some ref to its download as well)
+ * @returns {object} A object with the HTML for the download, as well as its progress
  */
-makeDownload = (link) => {
-    Api.logPair()
-    var dlObj = []
-    dlObj.push({
-        'html' : makeProgBar(20,0,fetchBox.value)
+makeDownload = (link) => {    
+    var ids = link.split('!') 
+    var dlObjs = []   
+    if($(`#${ids[1]}name`).length != 0){
+        window.alert("You are already downloading this file...")
+    } else {
+        dlObjs.push({
+            'html' : makeProgBar( 0, 0 , "Loading",id = ids[1], link = link)
+        })
+    }
+
+    dlObjs.forEach((dlObj) => {
+        if(dlObj == null) return;
+        $('#progress-area').append(dlObj.html)
+        downloads.push(dlObj)
     })
-    return dlObj;
+
+    return dlObjs;
 }
 
 /**
@@ -67,14 +100,32 @@ renderDownloads = (downloads) => {
     document.getElementById("progress-area").innerHTML = renderBuffer;
 }
 
+
+
+
 /**
  * Called whenever a new download is submitted via the fetchbutton, it calls make download to get
- * all the new filed and then renders all the files to the dom
+ * all the new files and then renders all the files to the dom
  */
-newDownload = () => {    
-    makeDownload().forEach((dlObj) => {
-        $('#progress-area').append(dlObj.html)
-        downloads.push(dlObj)
+var newDownload = function() {    
+    makeDownload(fetchBox.value)
+    $('#progress-area').children().each(() =>{ 
+        if(this.updated = "false"){                
+            Api.getMegaFile(fetchBox.value)
+            this.updated = "true"
+            document.getElementById(`${this.id}start`).addEventListener('click', (e)=>{
+                e.preventDefault();
+                var link = document.getElementById(this.id);
+                var prop = {
+                    //This download directory is hardcoded rn, but easy to make a little settings area for it later
+                    dir:"C:\\Users\\Xander\\Downloads\\MegaJS", 
+                    file: link.getAttribute("linked")
+                }
+                var dlMan = new DLM(prop)
+                console.log(link.getAttribute("linked"));
+                dlMan.start()
+            })
+        }
     })
 }
 
