@@ -29,13 +29,13 @@ makeProgBar = (size = 0, prog = 0, name = "loading", id, link = "false") =>{
              <div id = "${id}size">
                  0
              </div>
-             <div class="progress" id = "${id}prog">
+             <div class="progress" >
                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated"
                      aria-valuenow = ${prog}
                      aria-valuemin = "0" 
                      aria-valuemax = "100"
                      style = "width: ${prog}%;"
-                      
+                     id = "${id}prog"
                      updated = "false">
                  </div>
              </div>
@@ -119,7 +119,9 @@ var newDownload = function() {
                 var prop = {
                     //This download directory is hardcoded rn, but easy to make a little settings area for it later
                     dir:"C:\\Users\\Xander\\Downloads\\MegaJS", 
-                    file: link.getAttribute("linked")
+                    file: link.getAttribute("linked"),
+                    size: parseInt(document.getElementById(`${this.id}size`).innerHTML)*1000000,
+                    id: this.id
                 }
                 var dlMan = new DLM(prop)
                 console.log(link.getAttribute("linked"));
