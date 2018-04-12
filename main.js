@@ -2,14 +2,11 @@ const electron = require('electron')
 const path = require('path')
 const url = require('url')
 
-
-
 let mainWindow
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 
 function createWindow () {
-
   mainWindow = new BrowserWindow({
     frame: false,
     height: 1000,
