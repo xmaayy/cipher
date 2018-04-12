@@ -15,6 +15,15 @@ class ApiFetch {
     this.getAttr = this.getAttr.bind(this)
   }
 
+  getTotalSize (fileData) {
+    var size = fileData.size
+    if (fileData.directory) {
+      fileData.children.forEach(child => {
+        size += this.getTotalSize(child)
+      })
+    }
+    return size
+  }
   /**
      * This function is used ass the callback for get Attributes. It sets the attributes of the
      * download bars once their attributes have been fetched from the mega server
@@ -25,12 +34,7 @@ class ApiFetch {
      */
   getAttr (error, fileData) {
     console.log(fileData)
-    this.size = fileData.size
-    if (fileData.directory) {
-      fileData.children.forEach(child => {
-        this.size += child.size
-      })
-    } else { this.size = fileData.size }
+    this.size = this.getTotalSize(fileData)
 
     this.name = fileData.name
 
@@ -40,7 +44,7 @@ class ApiFetch {
       var query = fileData.downloadId
     }
     document.getElementById(`${query}name`).innerHTML = this.name
-    document.getElementById(`${query}size`).innerHTML = `${this.size / 1000000}MB`
+    document.getElementById(`${query}size`).innerHTML = `${Math.ceil(this.size / 1048576)}MB`
   }
 
   /**

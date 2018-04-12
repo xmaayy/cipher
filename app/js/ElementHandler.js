@@ -20,9 +20,9 @@ var Api = new ApiFetch()
  * @return {string} An HTML element corresponding to the download at the provided link
  */
 function makeProgBar (size = 0, prog = 0, name = 'loading', id, link = 'false') {
-  return `<div class="container-fluid" id = "${id}" linked = "${link}">
+  return `<div class="container-fluid" id = "${id}" linked = "${link}" updated = "false">
      <div class="row">
-         <div class="col-md-8">
+         <div class="col-md-7">
              <div id = "${id}name">
                  Loading...
              </div>
@@ -35,12 +35,14 @@ function makeProgBar (size = 0, prog = 0, name = 'loading', id, link = 'false') 
                      aria-valuemin = "0" 
                      aria-valuemax = "100"
                      style = "width: ${prog}%;"
-                     id = "${id}prog"
-                     updated = "false">
+                     id = "${id}prog">
                  </div>
              </div>
          </div>
-         <div class="col-md-4">
+         <div class="col-md-2" id = "${id}speed">
+         
+         </div>
+         <div class="col-md-3">
          <div>Controls</div>
              <div class="btn-group" role="group">			 
                 <button class="btn btn-secondary no-drag" type="button" id = "${id}start">
@@ -102,18 +104,20 @@ function renderDownloads (downloads) {
  */
 var newDownload = function () {
   makeDownload(fetchBox.value)
-  $('#progress-area').children().each(() => {
+  var downloads = $('#progress-area').children()
+  console.log(downloads)
+  downloads.each((n) => {
+    dlId = downloads[n].id
     Api.getMegaFile(fetchBox.value)
-    this.updated = 'true'
-    document.getElementById(`${this.id}start`).addEventListener('click', (e) => {
+    $(`#${dlId}start`).on('click', (e) => {
       e.preventDefault()
-      var link = document.getElementById(this.id)
+      var link = document.getElementById(dlId)
       var prop = {
         // This download directory is hardcoded rn, but easy to make a little settings area for it later
         dir: 'C:\\Users\\Xander\\Downloads\\MegaJS',
         file: link.getAttribute('linked'),
-        size: parseInt(document.getElementById(`${this.id}size`).innerHTML) * 1000000,
-        id: this.id
+        size: parseInt(document.getElementById(`${dlId}size`).innerHTML) * 1000000,
+        id: dlId
       }
       var dlMan = new DLM(prop)
       console.log(link.getAttribute('linked'))

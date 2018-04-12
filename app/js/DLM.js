@@ -22,6 +22,7 @@ class DLM {
     this.size = props.size
     this.downloaded = 0
     this.done = false
+    this.lastchunk = new Date().getTime()
 
     this.download = this.download.bind(this)
     this.updateDownloaded = this.updateDownloaded.bind(this)
@@ -44,11 +45,21 @@ class DLM {
      * @param {int} amnt The ammount by which to increment how much the client has downloaded
      */
   updateDownloaded (amnt) {
+    var d = new Date()
+
+    // Update Percentages
     var prog = Math.ceil((this.downloaded / this.size) * 100)
     this.downloaded += amnt
     document.getElementById(`${this.id}prog`).setAttribute('style', `width: ${prog}%;`)
-    console.log(`${prog}% done`)
-    console.log(`${this.downloaded} / ${this.size}`)
+
+    // Update Speeds
+    var spd = Math.ceil(amnt / ((d.getTime() - this.lastchunk) / 1000) / 1024)
+    if (spd > 1024) {
+      document.getElementById(`${this.id}speed`).innerHTML = `${Math.round(spd / 1024 * 100) / 100} MB/sec`
+    } else {
+      document.getElementById(`${this.id}speed`).innerHTML = `${spd} KB/sec`
+    }
+    this.lastchunk = d.getTime()
   }
 
   /**
@@ -66,6 +77,8 @@ class DLM {
     var dlStream = fileData.download().pipe(fs.createWriteStream(filePath))
     dlStream.on('finish', () => {
       console.log('COMPLETE!')
+      document.getElementById(`${this.id}speed`).innerHTML = ``
+      $(`#${this.id}start`).on('click', (e) => {})
     })
     console.log(dlStream)
     // Open a file watcher to add each files progress to the folders download progress

@@ -1,4 +1,4 @@
-# Project Title
+# Cipher - An electron based downloader - Because why not
 The cipher client is intended to make it easy for you to download encrypted links. This allows for people
 to post links online without the end user ever having to know where the download is coming from, just what
 the file is and how big it is.
@@ -24,6 +24,8 @@ npm i
 npm start
 
 YOURE DONE!
+
+
 ## Running the tests
 
 Nothing yet, tests are a long way off
